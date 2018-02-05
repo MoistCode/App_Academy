@@ -3,7 +3,7 @@
 # fill in the consecutive set.
 
 def missing_numbers(nums)
-
+  (nums.sort.first..nums.sort.last).to_a - nums
 end
 
 # Write a method that given a string representation of a binary number will
@@ -16,7 +16,11 @@ end
 # You may NOT use the Ruby String class's built in base conversion method.
 
 def base2to10(binary)
-  
+  num = 0
+  binary.split("").reverse.each_with_index do |el, idx|
+    num += el.to_i * (2**idx)
+  end
+  num
 end
 
 class Hash
@@ -31,7 +35,13 @@ class Hash
   # above. Do not use Hash#select in your method.
 
   def my_select(&prc)
+    hsh = Hash.new
 
+    self.each do |k, v|
+      hsh[k] = v if prc.call(k, v)
+    end
+
+    hsh
   end
 
 end
@@ -49,6 +59,25 @@ class Hash
   # Hash#merge in your method.
 
   def my_merge(hash, &prc)
+    hsh = Hash.new
+    p self, hash
+    if !block_given?
+      prc = Proc.new{|k, old_val, new_val| new_val }
+    end
+
+    self.each do |k1, old_val|
+      if hash.keys.include?(k1)
+        hsh[k1] = prc.call(k1, old_val, hash[k1])
+      else
+        hsh[k1] = old_val
+      end
+    end
+
+    hash.each do |k2, new_val|
+      hsh[k2] = new_val if !hsh.keys.include?(k2)
+    end
+
+    hsh
 
   end
 end
@@ -72,7 +101,24 @@ end
 # position of the Lucas series.
 
 def lucas_numbers(n)
+  arr = [2, 1]
+  if n == 1 || n == 0
+    return arr[n]
+  else
+    counter = 2
+    until counter > n.abs
+      arr << (arr[counter -1] + arr[counter -2])
+      counter += 1
+    end
+  end
 
+  if n >= 0
+    return arr[n]
+  elsif n.odd?
+    return -(arr[n.abs])
+  elsif n.even?
+    return arr[n.abs]
+  end
 end
 
 # A palindrome is a word or sequence of words that reads the same backwards as
@@ -80,5 +126,16 @@ end
 # string. If there is no palindrome longer than two letters, return false.
 
 def longest_palindrome(string)
-
+  counter = string.length
+  string_split = string.split("")
+  highest_count = 0
+  until counter < 3
+    string_split.each_cons(counter) do |el|
+      if el == el.reverse
+        highest_count = el.length if el.length > highest_count
+      end
+    end
+    counter -= 1
+  end
+  highest_count == 0 ? false : highest_count
 end
