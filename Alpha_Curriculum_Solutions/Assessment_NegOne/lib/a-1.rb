@@ -3,7 +3,7 @@
 # fill in the consecutive set.
 
 def missing_numbers(nums)
-
+  (nums.min..nums.max).to_a - nums
 end
 
 # Write a method that given a string representation of a binary number will
@@ -16,7 +16,11 @@ end
 # You may NOT use the Ruby String class's built in base conversion method.
 
 def base2to10(binary)
-  
+  new_num = 0
+  binary.reverse.chars.each_with_index do |val, power|
+    new_num += (val.to_i * 2 ** power)
+  end
+  new_num
 end
 
 class Hash
@@ -31,7 +35,13 @@ class Hash
   # above. Do not use Hash#select in your method.
 
   def my_select(&prc)
+    new_hash = {}
 
+    self.each do |key, value|
+      new_hash[key] = value if prc.call(key, value)
+    end
+
+    new_hash
   end
 
 end
@@ -49,8 +59,20 @@ class Hash
   # Hash#merge in your method.
 
   def my_merge(hash, &prc)
+    prc ||= Proc.new { |k, oldval, newval| newval }
+    new_hash = {}
 
+    self.each do |key, value|
+      new_hash[key] =  hash[key] ? prc.call(key, value, hash[key]) : value
+    end
+
+    hash.each do |key, value|
+      new_hash[key] = value if new_hash[key].nil?
+    end
+
+    new_hash
   end
+
 end
 
 # The Lucas series is a sequence of integers that extends infinitely in both
@@ -73,6 +95,32 @@ end
 
 def lucas_numbers(n)
 
+  lucas_series = [2, 1]
+
+  return lucas_series.first if n == 0
+
+  if n >= 0
+    until lucas_series.length == n + 1
+      lucas_series << lucas_series[-1] + lucas_series[-2]
+    end
+    lucas_series.last
+  else
+    until lucas_series.length == 2 - n
+      lucas_series.unshift(lucas_series[1] - lucas_series[0])
+    end
+    lucas_series.first
+  end
+
+  ## Recursive Solution:
+  #
+  # return 2 if n == 0
+  # return 1 if n == 1
+  # if n > 0
+  #   lucas_numbers(n-1) + lucas_numbers(n-2)
+  # else
+  #   lucas_numbers(n+2) - lucas_numbers(n+1)
+  # end
+
 end
 
 # A palindrome is a word or sequence of words that reads the same backwards as
@@ -80,5 +128,11 @@ end
 # string. If there is no palindrome longer than two letters, return false.
 
 def longest_palindrome(string)
+  string.length.downto(1) do |idx|
+    string.chars.each_cons(idx) do |sub|
+      return sub.length if sub == sub.reverse && sub.length > 2
+    end
+  end
 
+  false
 end

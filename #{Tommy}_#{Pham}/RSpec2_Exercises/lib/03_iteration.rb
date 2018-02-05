@@ -212,15 +212,10 @@ class Array
     arr
   end
 
-  def my_inject(initial = false)
-    block_given? ? prc = yield : prc = Proc.new{|a, b| a + b}
-    initial = self.first if initial == false
-
-    self.each_with_index do |el, idx|
-      next if idx == 0
-      initial = prc.call(initial, el)
-    end
-    initial
+  def my_inject(&prc)
+    first_val = self.first
+    self.drop(1).my_each {|el| first_val = prc.call(first_val, el)}
+    first_val
   end
 end
 
@@ -234,5 +229,5 @@ end
 # ```
 
 def concatenate(strings)
-  strings.my_inject(:+)
+  strings.inject(:+)
 end
